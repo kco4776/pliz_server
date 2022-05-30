@@ -29,3 +29,8 @@ class PlaylistService:
 
     def ranking(self):
         return self.playlist_dao.get_playlist_ranking()
+
+    def comment(self, user_id, playlist_id, comment):
+        if len(comment)>100:
+            return None
+        return self.playlist_dao.insert_comment(user_id, playlist_id, comment)

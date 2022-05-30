@@ -48,7 +48,7 @@ class PlaylistDao:
         """), song).rowcount
 
     def get_playlist(self):
-        playlist = self.execute(text("""
+        playlist = self.db.execute(text("""
                 SELECT pl.id, users.name, pl.title, pl.description, pl.like FROM playlist as pl
                 LEFT JOIN users
                 ON pl.user_id = users.id
@@ -60,7 +60,8 @@ class PlaylistDao:
             'like': p['like'],
             'title': p['title'],
             'description': p['description'],
-            'song': self.get_song(p['id'])
+            'song': self.get_song(p['id']),
+            'comments': self.get_comments(p['id'])
         } for p in playlist]
 
     def insert_like(self, user_id, playlist_id):
@@ -86,7 +87,7 @@ class PlaylistDao:
     def insert_unlike(self, user_id, playlist_id):
         cnt = self.db.execute(text("""
             DELETE FROM users_like_list
-            WHERE id = :id
+            WHERE user_id = :id
             AND like_playlist_id = :playlist_id
         """), {
             'id': user_id,
@@ -111,3 +112,32 @@ class PlaylistDao:
             'title': r['title'],
             'like': r['like']
         } for r in ranking]
+
+    def insert_comment(self, user_id, playlist_id, comment):
+        return self.db.execute(text("""
+            INSERT INTO playlist_comments (
+                user_id,
+                playlist_id,
+                comment
+            ) VALUES (
+                :user_id,
+                :playlist_id,
+                :comment
+            )
+        """), {
+            'user_id': user_id,
+            'playlist_id': playlist_id,
+            'comment': comment
+        }).rowcount
+
+    def get_comments(self, playlist_id):
+        playlist = self.db.execute(text("""
+            SELECT users.name, pc.comment
+            FROM playlist_comments as pc
+            JOIN users ON pc.user_id = users.id
+            WHERE pc.playlist_id = :id
+        """), {'id': playlist_id}).fetchall()
+        return [{
+            'user_name': p['name'],
+            'comment': p['comment']
+        } for p in playlist]

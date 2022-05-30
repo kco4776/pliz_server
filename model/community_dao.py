@@ -45,7 +45,7 @@ class CommunityDao:
             FROM community_comments as cc
             JOIN users ON cc.user_id = users.id
             WHERE cc.community_id = :id
-        """), {'id': community_id}).fetch_all()
+        """), {'id': community_id}).fetchall()
         return [{
             'user_name': c['name'],
             'comment': c['comment']
