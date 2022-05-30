@@ -24,7 +24,7 @@ class UserService:
 
         authorized = user_credential and bcrypt.checkpw(
             password.encode('UTF-8'),
-            user_credential['password'].encode('UTF-8')
+            user_credential['hashed_password'].encode('UTF-8')
         )
         return authorized
 
