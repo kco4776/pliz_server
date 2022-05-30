@@ -49,7 +49,7 @@ def create_endpoints(app, services, config):
         new_user = request.json
         if 'name' not in new_user.keys() or 'email' not in new_user.keys() or 'password' not in new_user.keys():
             return "request data error", 400
-        new_user = user_service.new_user(new_user)
+        new_user = user_service.create_new_user(new_user)
         return jsonify(new_user)
 
     @app.route("/login", methods=['POST'])
