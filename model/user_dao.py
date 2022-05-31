@@ -28,7 +28,7 @@ class UserDao:
 
     def insert_user(self, user):
         return self.db.execute(text("""
-            INSERT INTO USERS (
+            INSERT INTO users (
                 name, 
                 email, 
                 hashed_password
@@ -44,7 +44,7 @@ class UserDao:
             SELECT
                 id,
                 hashed_password
-            FROM USERS
+            FROM users
             WHERE email = :email
         """), {'email': email}).fetchone()
 
