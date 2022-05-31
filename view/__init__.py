@@ -120,9 +120,9 @@ def create_endpoints(app, services, config):
             'id': community_service.community(user_id, title, content)
         })
 
-    @app.route("/comment", methods=['POST'])
+    @app.route("/info-comment", methods=['POST'])
     @login_required
-    def comment():
+    def info_comment():
         user_comment = request.json
         if 'community_id' not in user_comment.keys() or 'comment' not in user_comment.keys():
             return Response(status=400)
@@ -201,6 +201,18 @@ def create_endpoints(app, services, config):
         user_id = g.user_id
         playlist_id = payload['playlist_id']
         playlist_service.unlike(user_id, playlist_id)
+        return Response(status=200)
+
+    @app.route("/playlist-comment", methods=['POST'])
+    @login_required
+    def playlist_comment():
+        user_comment = request.json
+        if 'playlist_id' not in user_comment.keys() or 'comment' not in user_comment.keys():
+            return Response(status=400)
+        user_id = g.user_id
+        playlist_id = user_comment['playlist_id']
+        _comment = user_comment['comment']
+        playlist_service.comment(user_id, playlist_id, _comment)
         return Response(status=200)
 
     @app.route("/playlist-ranking", methods=['GET'])

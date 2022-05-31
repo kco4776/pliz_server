@@ -12,7 +12,8 @@ class CommunityService:
             return None
         if len(content)>500:
             return None
-        return self.community_dao.insert_community(user_id, title, content)
+        new_community_id = self.community_dao.insert_community(user_id, title, content)
+        return new_community_id
 
     def comment(self, user_id, community_id, comment):
         if len(comment)>100:

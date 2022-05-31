@@ -12,7 +12,8 @@ class PlaylistService:
             return None
         if len(description)>500:
             return None
-        return self.playlist_dao.insert_playlist(user_id, title, description)
+        new_playlist_id = self.playlist_dao.insert_playlist(user_id, title, description)
+        return new_playlist_id
 
     def song(self, title, singer, playlist_id):
         if len(title)>50:
@@ -29,3 +30,8 @@ class PlaylistService:
 
     def ranking(self):
         return self.playlist_dao.get_playlist_ranking()
+
+    def comment(self, user_id, playlist_id, comment):
+        if len(comment)>100:
+            return None
+        return self.playlist_dao.insert_comment(user_id, playlist_id, comment)
