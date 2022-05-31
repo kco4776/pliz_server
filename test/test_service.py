@@ -15,6 +15,13 @@ database = create_engine(config.test_config['DB_URL'],
 def user_service():
     return UserService(UserDao(database), config.test_config)
 
+@pytest.fixture
+def community_service():
+    return CommunityService(CommunityDao(database))
+
+@pytest.fixture
+def playlist_service():
+    return PlaylistService(PlaylistDao(database))
 
 def setup_function():
     hashed_password = bcrypt.hashpw(
@@ -48,12 +55,93 @@ def setup_function():
         )
     """), new_users)
 
+    database.execute(text("""
+        INSERT INTO community (
+            user_id,
+            title,
+            content
+        ) VALUES (
+            :id,
+            :title,
+            :content
+        )
+    """), {
+        'id': 1,
+        'title': 'test title',
+        'content': 'test content'
+    })
+    database.execute(text("""
+        INSERT INTO community_comments (
+            user_id,
+            community_id,
+            comment
+        ) VALUES (
+            :user_id,
+            :community_id,
+            :comment
+        )
+    """), {
+        'user_id': 1,
+        'community_id': 1,
+        'comment': "test comment"
+    })
+    database.execute(text("""
+        INSERT INTO playlist (
+            user_id,
+            title,
+            description
+        ) VALUES (
+            :id,
+            :title,
+            :description
+        )
+    """), {
+        'id': 1,
+        'title': "test playlist title",
+        'description': 'test description'
+    })
+    database.execute(text("""
+        INSERT INTO song (
+            title,
+            singer,
+            playlist_id
+        ) VALUES (
+            :title,
+            :singer,
+            :playlist_id
+        )
+    """), {
+        'title': 'test song title',
+        'singer': 'test singer',
+        'playlist_id': 1
+    })
+    database.execute(text("""
+        INSERT INTO playlist_comments (
+            user_id,
+            playlist_id,
+            comment
+        ) VALUES (
+            :user_id,
+            :playlist_id,
+            :comment
+        )
+    """), {
+        'user_id': 1,
+        'playlist_id': 1,
+        'comment': "test playlist comment"
+    })
 
 
 def teardown_function():
     database.execute(text("SET FOREIGN_KEY_CHECKS=0"))
     database.execute(text("TRUNCATE users"))
     database.execute(text("TRUNCATE users_follow_list"))
+    database.execute(text("TRUNCATE community"))
+    database.execute(text("TRUNCATE community_comments"))
+    database.execute(text("TRUNCATE playlist"))
+    database.execute(text("TRUNCATE song"))
+    database.execute(text("TRUNCATE playlist_comments"))
+    database.execute(text("TRUNCATE users_like_list"))
     database.execute(text("SET FOREIGN_KEY_CHECKS=1"))
 
 def get_user(user_id):
@@ -69,6 +157,7 @@ def get_user(user_id):
         'email': row['email']
     } if row else None
 
+
 def get_follow_list(user_id):
     rows = database.execute(text("""
         SELECT follow_user_id as id
@@ -76,6 +165,57 @@ def get_follow_list(user_id):
         WHERE user_id = :user_id
     """), {'user_id': user_id}).fetchall()
     return [int(row['id']) for row in rows]
+
+
+def get_info_community(community_id):
+    r = database.execute(text("""
+        SELECT `user_id`, `title`, `content`
+        FROM `community`
+        WHERE `id` = :community_id
+    """), {'community_id': community_id}).fetchone()
+    return {
+        'user_id': r['user_id'],
+        'title': r['title'],
+        'content': r['content']
+    }
+
+
+def get_comments(community_id):
+    rows = database.execute(text("""
+        SELECT user_id, comment
+        FROM community_comments
+        WHERE community_id = :id
+    """), {'id': community_id}).fetchall()
+    return [{
+        'user_id': row['user_id'],
+        'comment': row['comment']
+    } for row in rows]
+
+
+def get_playlist_community(playlist_id):
+    playlist = database.execute(text("""
+        SELECT id, title, description, `like`
+        FROM playlist
+        WHERE id = :playlist_id
+    """), {'playlist_id': playlist_id}).fetchone()
+    return {
+        'id': playlist['id'],
+        'title': playlist['title'],
+        'description': playlist['description'],
+        'like': playlist['like']
+    }
+
+def get_song(playlist_id):
+    songs = database.execute(text("""
+        SELECT song.title, song.singer
+        FROM playlist as pl
+        JOIN song on pl.id = song.playlist_id
+        WHERE pl.id = :playlist_id
+    """), {'playlist_id': playlist_id}).fetchall()
+    return [{
+        'title': s['title'],
+        'singer': s['singer']
+    } for s in songs]
 
 def test_create_new_user(user_service):
     new_user = {
@@ -134,5 +274,106 @@ def test_follower_ranking(user_service):
             'name': 'kim',
             'email': 'kim@gmail.com',
             'follower': 0
+        }
+    ]
+
+def test_info_community(community_service):
+    assert community_service.info_community() == [{
+        'id': 1,
+        'user_id': 1,
+        'title': 'test title',
+        'content': 'test content',
+        'comments': [{'user_name': 'kim', 'comment': 'test comment'}]
+    }]
+
+def test_community(community_service):
+    title = "test2"
+    content = "test2"
+    new_community_id = community_service.community(2, title, content)
+    assert new_community_id == 2
+    assert get_info_community(new_community_id) == {
+        'user_id': 2,
+        'title': title,
+        'content': content
+    }
+
+def test_community_comment(community_service):
+    comment = "test2"
+    community_service.comment(1, 1, comment)
+    assert get_comments(1) == [
+        {
+            'user_id': 1,
+            'comment': 'test comment'
+        },
+        {
+            'user_id': 1,
+            'comment': comment
+        }
+    ]
+
+def test_playlist_community(playlist_service):
+    assert playlist_service.playlist_community() == [{
+        'id': 1,
+        'user_name': 'kim',
+        'like': 0,
+        'title': 'test playlist title',
+        'description': 'test description',
+        'song': [{'title': 'test song title', 'singer': 'test singer'}],
+        'comments': [{'user_name': 'kim', 'comment': 'test playlist comment'}]
+    }]
+
+def test_playlist(playlist_service):
+    title = "test2"
+    description = "test2"
+    new_playlist_id = playlist_service.playlist(1, title, description)
+    assert new_playlist_id == 2
+    assert get_playlist_community(new_playlist_id) == {
+        'id': new_playlist_id,
+        'title': title,
+        'description': description,
+        'like': 0
+    }
+
+def test_song(playlist_service):
+    title = "test2"
+    singer = "test2"
+    playlist_service.song(title, singer, 1)
+    assert get_song(1) == [
+        {
+            'title': 'test song title',
+            'singer': 'test singer'
+        },
+        {
+            'title': 'test2',
+            'singer': 'test2'
+        }
+    ]
+
+def test_like(playlist_service):
+    playlist_service.like(1, 1)
+    playlist = get_playlist_community(1)
+    assert playlist['like'] == 1
+
+def test_unlike(playlist_service):
+    playlist_service.like(1, 1)
+    playlist_service.unlike(1, 1)
+    playlist = get_playlist_community(1)
+    assert playlist['like'] == 0
+
+def test_ranking(playlist_service):
+    title = 'test2'
+    description = 'test2'
+    new_playlist_id = playlist_service.playlist(2, title, description)
+    playlist_service.like(1, 1)
+    assert playlist_service.ranking() == [
+        {
+            'name': 'kim',
+            'title': 'test playlist title',
+            'like': 1
+        },
+        {
+            'name': 'lee',
+            'title': title,
+            'like': 0
         }
     ]

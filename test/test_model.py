@@ -145,13 +145,6 @@ def teardown_function():
     database.execute(text("TRUNCATE playlist_comments"))
     database.execute(text("TRUNCATE users_like_list"))
     database.execute(text("SET FOREIGN_KEY_CHECKS=1"))
-    """
-    SET FOREIGN_KEY_CHECKS=0;
-    TRUNCATE TABLE users;
-    TRUNCATE TABLE community;
-    SET FOREIGN_KEY_CHECKS=1;
-    """
-
 
 def get_user(user_id):
     row = database.execute(text("""
@@ -176,17 +169,17 @@ def get_follow_list(user_id):
     return [int(row['id']) for row in rows]
 
 
-def get_info_community():
-    posting = database.execute(text("""
-        SELECT user_id, title, content
-        FROM community
-        ORDER BY created_at DESC
-    """)).fetchall()
-    return [{
+def get_info_community(community_id):
+    r = database.execute(text("""
+        SELECT `user_id`, `title`, `content`
+        FROM `community`
+        WHERE `id` = :community_id
+    """), {'community_id': community_id}).fetchone()
+    return {
         'user_id': r['user_id'],
         'title': r['title'],
         'content': r['content']
-    } for r in posting]
+    }
 
 
 def get_comments(community_id):
@@ -273,21 +266,16 @@ def test_get_follower_ranking(user_dao):
 
 
 def test_insert_community(community_dao):
-    posting_id = community_dao.insert_community(1, "test2", "test2")
+    title = "test2"
+    content = "test2"
+    posting_id = community_dao.insert_community(1, title, content)
     assert posting_id == 2
-    posting = get_info_community()
-    assert posting == [
-        {
-            'user_id': 1,
-            'title': 'test title',
-            'content': 'test content'
-        },
-        {
-            'user_id': 1,
-            'title': 'test2',
-            'content': "test2"
-        }
-    ]
+    posting = get_info_community(posting_id)
+    assert posting == {
+        'user_id': 1,
+        'title': title,
+        'content': content
+    }
 
 
 def test_insert_comment(community_dao):

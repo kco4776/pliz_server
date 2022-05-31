@@ -34,7 +34,7 @@ class PlaylistDao:
             'description': description
         }).lastrowid
 
-    def insert_song(self, song):
+    def insert_song(self, title, singer, playlist_id):
         return self.db.execute(text("""
             INSERT INTO song (
                 title,
@@ -45,7 +45,11 @@ class PlaylistDao:
                 :singer,
                 :id
             )
-        """), song).rowcount
+        """), {
+            'title': title,
+            'singer': singer,
+            'id': playlist_id
+        }).rowcount
 
     def get_playlist(self):
         playlist = self.db.execute(text("""
