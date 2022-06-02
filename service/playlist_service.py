@@ -7,6 +7,9 @@ class PlaylistService:
     def playlist_community(self):
         return self.playlist_dao.get_playlist()
 
+    def playlist_community_by_id(self, playlist_id):
+        return self.playlist_dao.get_playlist_by_id(playlist_id)
+
     def playlist(self, user_id, title, description):
         if len(title)>30:
             return None

@@ -250,6 +250,11 @@ def test_generate_access_token(user_service):
 
     assert payload['user_id'] == 1
 
+def test_user_info(user_service):
+    user_id = 2
+    info = user_service.user_info(user_id)
+    assert info['id'] == user_id
+
 def test_follow(user_service):
     user_service.follow(1, 2)
     follow_list = get_follow_list(1)
@@ -280,11 +285,15 @@ def test_follower_ranking(user_service):
 def test_info_community(community_service):
     assert community_service.info_community() == [{
         'id': 1,
-        'user_id': 1,
+        'user_name': 'kim',
         'title': 'test title',
         'content': 'test content',
         'comments': [{'user_name': 'kim', 'comment': 'test comment'}]
     }]
+
+def test_info_community_by_id(community_service):
+    info = community_service.info_community_by_id(1)
+    assert info['id'] == 1
 
 def test_community(community_service):
     title = "test2"
@@ -321,6 +330,9 @@ def test_playlist_community(playlist_service):
         'song': [{'title': 'test song title', 'singer': 'test singer'}],
         'comments': [{'user_name': 'kim', 'comment': 'test playlist comment'}]
     }]
+
+def test_playlist_community_by_id(playlist_service):
+    assert playlist_service.playlist_community_by_id(1)['id'] == 1
 
 def test_playlist(playlist_service):
     title = "test2"

@@ -53,14 +53,30 @@ class CommunityDao:
 
     def get_community(self):
         posting = self.db.execute(text("""
-            SELECT id, user_id, title, content
-            FROM community
-            ORDER BY created_at DESC LIMIT 30
+            SELECT cc.id, users.name, cc.title, cc.content
+            FROM community as cc
+            JOIN users ON cc.user_id = users.id
+            ORDER BY cc.created_at DESC LIMIT 30
         """)).fetchall()
         return [{
             'id': p['id'],
-            'user_id': p['user_id'],
+            'user_name': p['name'],
             'title': p['title'],
             'content': p['content'],
             'comments': self.get_comments(p['id'])
         } for p in posting]
+
+    def get_community_by_id(self, community_id):
+        community = self.db.execute(text("""
+            SELECT cc.id, users.name, cc.title, cc.content
+            FROM community as cc
+            JOIN users ON cc.user_id = users.id
+            WHERE cc.id = :id
+        """), {'id': community_id}).fetchone()
+        return {
+            'id': community['id'],
+            'user_name': community['name'],
+            'title': community['title'],
+            'content': community['content'],
+            'comments': self.get_comments(community['id'])
+        } if community else None

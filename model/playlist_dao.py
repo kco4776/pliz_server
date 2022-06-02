@@ -68,6 +68,23 @@ class PlaylistDao:
             'comments': self.get_comments(p['id'])
         } for p in playlist]
 
+    def get_playlist_by_id(self, playlist_id):
+        playlist = self.db.execute(text("""
+            SELECT pl.id, users.name, pl.title, pl.description, pl.like
+            FROM playlist as pl
+            JOIN users ON pl.user_id = users.id
+            WHERE pl.id = :id
+        """), {'id': playlist_id}).fetchone()
+        return {
+            'id': playlist['id'],
+            'user_name': playlist['name'],
+            'like': playlist['like'],
+            'title': playlist['title'],
+            'description': playlist['description'],
+            'song': self.get_song(playlist['id']),
+            'comments': self.get_comments(playlist['id'])
+        } if playlist else None
+
     def insert_like(self, user_id, playlist_id):
         cnt = self.db.execute(text("""
             INSERT INTO users_like_list (
