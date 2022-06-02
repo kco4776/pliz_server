@@ -234,6 +234,16 @@ def test_get_user_id_and_password(user_dao):
     assert bcrypt.checkpw('test password'.encode('UTF-8'),
                           user_credential['hashed_password'].encode('UTF-8'))
 
+def test_get_user(user_dao):
+    info = user_dao.get_user(1)
+    assert info == {
+        'id': 1,
+        'name': 'kim',
+        'email': 'kim@gmail.com',
+        'follower': 0,
+        'follow': 0
+    }
+
 
 def test_insert_follow(user_dao):
     user_dao.insert_follow(1, 2)
@@ -307,7 +317,7 @@ def test_get_comments(community_dao):
 def test_get_community(community_dao):
     assert community_dao.get_community() == [{
         'id': 1,
-        'user_id': 1,
+        'user_name': 'kim',
         'title': 'test title',
         'content': 'test content',
         'comments': [{
@@ -315,6 +325,9 @@ def test_get_community(community_dao):
             'comment': 'test comment'
         }]
     }]
+
+def test_get_community_by_id(community_dao):
+    assert community_dao.get_community_by_id(1)['id'] == 1
 
 
 def test_get_song(playlist_dao):
@@ -344,6 +357,9 @@ def test_get_playlist(playlist_dao):
         'song': [{'title': "test song title", 'singer': "test singer"}],
         'comments': [{'user_name': 'kim', 'comment': "test playlist comment"}]
     }]
+
+def test_get_playlist_by_id(playlist_dao):
+    assert playlist_dao.get_playlist_by_id(1)['id'] == 1
 
 def test_insert_like(playlist_dao):
     playlist_dao.insert_like(1, 1)

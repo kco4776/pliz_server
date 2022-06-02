@@ -7,6 +7,9 @@ class CommunityService:
     def info_community(self):
         return self.community_dao.get_community()
 
+    def info_community_by_id(self, community_id):
+        return self.community_dao.get_community_by_id(community_id)
+
     def community(self, user_id, title, content):
         if len(title)>30:
             return None

@@ -71,6 +71,17 @@ def create_endpoints(app, services, config):
         else:
             return Response(status=401)
 
+    @app.route("/user-info/<int:user_id>", methods=['POST'])
+    def user_info(user_id):
+        info = user_service.user_info(user_id)
+        return jsonify({
+            'user_id': info['user_id'],
+            'name': info['name'],
+            'email': info['email'],
+            'follower': info['follower'],
+            'follow': info['follow']
+        }) if info else Response(status=404)
+
     @app.route("/follow", methods=['POST'])
     @login_required
     def follow():
@@ -106,6 +117,11 @@ def create_endpoints(app, services, config):
         return jsonify({
             'info_community': community_service.info_community()
         })
+
+    @app.route("/info-community-id/<int:community_id>", methods=['GET'])
+    def info_community_id(community_id):
+        info = community_service.get_community_by_id(community_id)
+        return jsonify(info) if info else Response(status=404)
 
     @app.route("/community", methods=['POST'])
     @login_required
@@ -156,6 +172,11 @@ def create_endpoints(app, services, config):
         return jsonify({
             'playlist_community': playlist_service.playlist_community()
         })
+
+    @app.route("/playlist-community-id/<int:playlist_id>", methods=['GET'])
+    def playlist_community_id(playlist_id):
+        info = playlist_service.get_playlist_by_id(playlist_id)
+        return jsonify(info) if info else Response(status=404)
 
     @app.route("/playlist", methods=['POST'])
     @login_required

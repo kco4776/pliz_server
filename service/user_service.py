@@ -36,6 +36,9 @@ class UserService:
         token = jwt.encode(payload, self.config['JWT_SECRET_KEY'], 'HS256')
         return token
 
+    def user_info(self, user_id):
+        return self.user_dao.get_user(user_id)
+
     def follow(self, user_id, follow_id):
         return self.user_dao.insert_follow(user_id, follow_id)
 

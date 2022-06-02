@@ -49,12 +49,93 @@ def setup_function():
         )
     """), new_users)
 
+    database.execute(text("""
+        INSERT INTO community (
+            user_id,
+            title,
+            content
+        ) VALUES (
+            :id,
+            :title,
+            :content
+        )
+    """), {
+        'id': 1,
+        'title': 'test title',
+        'content': 'test content'
+    })
+    database.execute(text("""
+        INSERT INTO community_comments (
+            user_id,
+            community_id,
+            comment
+        ) VALUES (
+            :user_id,
+            :community_id,
+            :comment
+        )
+    """), {
+        'user_id': 1,
+        'community_id': 1,
+        'comment': "test comment"
+    })
+    database.execute(text("""
+        INSERT INTO playlist (
+            user_id,
+            title,
+            description
+        ) VALUES (
+            :id,
+            :title,
+            :description
+        )
+    """), {
+        'id': 1,
+        'title': "test playlist title",
+        'description': 'test description'
+    })
+    database.execute(text("""
+        INSERT INTO song (
+            title,
+            singer,
+            playlist_id
+        ) VALUES (
+            :title,
+            :singer,
+            :playlist_id
+        )
+    """), {
+        'title': 'test song title',
+        'singer': 'test singer',
+        'playlist_id': 1
+    })
+    database.execute(text("""
+        INSERT INTO playlist_comments (
+            user_id,
+            playlist_id,
+            comment
+        ) VALUES (
+            :user_id,
+            :playlist_id,
+            :comment
+        )
+    """), {
+        'user_id': 1,
+        'playlist_id': 1,
+        'comment': "test playlist comment"
+    })
 
 
 def teardown_function():
     database.execute(text("SET FOREIGN_KEY_CHECKS=0"))
     database.execute(text("TRUNCATE users"))
     database.execute(text("TRUNCATE users_follow_list"))
+    database.execute(text("TRUNCATE community"))
+    database.execute(text("TRUNCATE community_comments"))
+    database.execute(text("TRUNCATE playlist"))
+    database.execute(text("TRUNCATE song"))
+    database.execute(text("TRUNCATE playlist_comments"))
+    database.execute(text("TRUNCATE users_like_list"))
     database.execute(text("SET FOREIGN_KEY_CHECKS=1"))
 
 def test_ping(api):
@@ -95,4 +176,11 @@ def test_authorized(api):
 #     resp_json = json.loads(resp.data.decode('utf-8'))
 #     access_token = resp_json['access_token']
 #
-#     resp = api.get()
+#     resp = api.post(
+#         '/follow',
+#         data = json.dumps({
+#             'follow': 2
+#         }),
+#         Authorization=access_token,
+#         content_type='application/json'
+#     )
