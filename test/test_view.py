@@ -184,3 +184,22 @@ def test_authorized(api):
 #         Authorization=access_token,
 #         content_type='application/json'
 #     )
+
+def test_my_info(api):
+    resp = api.post(
+        '/login',
+        data = json.dumps({
+            'email': 'kim@gmail.com',
+            'password': 'test password'
+        }),
+        content_type = 'application/json'
+    )
+    resp_json = json.loads(resp.data.decode('utf-8'))
+    access_token = resp_json['access_token']
+
+    resp = api.get(
+        'my-info',
+        headers={'Authorization': access_token}
+    )
+    resp_json = json.loads(resp.data.decode('utf-8'))
+    assert resp_json['email'] == 'kim@gmail.com'
