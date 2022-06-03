@@ -53,36 +53,38 @@ class PlaylistDao:
 
     def get_playlist(self):
         playlist = self.db.execute(text("""
-                SELECT pl.id, users.name, pl.title, pl.description, pl.like FROM playlist as pl
+                SELECT pl.id as playlist_id, users.id as user_id, users.name, pl.title, pl.description, pl.like FROM playlist as pl
                 LEFT JOIN users
                 ON pl.user_id = users.id
                 ORDER BY pl.created_at DESC limit 10
             """)).fetchall()
         return [{
-            'id': p['id'],
+            'playlist_id': p['playlist_id'],
+            'user_id': p['user_id'],
             'user_name': p['name'],
             'like': p['like'],
             'title': p['title'],
             'description': p['description'],
-            'song': self.get_song(p['id']),
-            'comments': self.get_comments(p['id'])
+            'song': self.get_song(p['playlist_id']),
+            'comments': self.get_comments(p['playlist_id'])
         } for p in playlist]
 
     def get_playlist_by_id(self, playlist_id):
         playlist = self.db.execute(text("""
-            SELECT pl.id, users.name, pl.title, pl.description, pl.like
+            SELECT pl.id as playlist_id, users.id as user_id, users.name, pl.title, pl.description, pl.like
             FROM playlist as pl
             JOIN users ON pl.user_id = users.id
             WHERE pl.id = :id
         """), {'id': playlist_id}).fetchone()
         return {
-            'id': playlist['id'],
+            'playlist_id': playlist['playlist_id'],
+            'user_id': playlist['user_id'],
             'user_name': playlist['name'],
             'like': playlist['like'],
             'title': playlist['title'],
             'description': playlist['description'],
-            'song': self.get_song(playlist['id']),
-            'comments': self.get_comments(playlist['id'])
+            'song': self.get_song(playlist['playlist_id']),
+            'comments': self.get_comments(playlist['playlist_id'])
         } if playlist else None
 
     def insert_like(self, user_id, playlist_id):
@@ -123,12 +125,13 @@ class PlaylistDao:
 
     def get_playlist_ranking(self):
         ranking = self.db.execute(text("""
-            SELECT users.name, pl.title, pl.like
+            SELECT users.id as user_id, users.name, pl.title, pl.like
             FROM playlist as pl
             JOIN users ON pl.user_id = users.id
             ORDER BY pl.like DESC LIMIT 10
         """)).fetchall()
         return [{
+            'user_id': r['user_id'],
             'name': r['name'],
             'title': r['title'],
             'like': r['like']
@@ -153,12 +156,25 @@ class PlaylistDao:
 
     def get_comments(self, playlist_id):
         playlist = self.db.execute(text("""
-            SELECT users.name, pc.comment
+            SELECT users.id as user_id, users.name, pc.comment
             FROM playlist_comments as pc
             JOIN users ON pc.user_id = users.id
             WHERE pc.playlist_id = :id
         """), {'id': playlist_id}).fetchall()
         return [{
+            'user_id': p['user_id'],
             'user_name': p['name'],
             'comment': p['comment']
         } for p in playlist]
+
+    def get_like_playlist(self, user_id):
+        like_playlist = self.db.execute(text("""
+            SELECT pl.id, pl.title
+            FROM users_like_list as ul
+            JOIN playlist as pl ON ul.like_playlist_id = pl.id
+            WHERE ul.user_id = :id
+        """), {'id': user_id}).fetchall()
+        return [{
+            'playlist_id': p['id'],
+            'title': p['title']
+        } for p in like_playlist]

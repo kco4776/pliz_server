@@ -13,7 +13,7 @@ database = create_engine(config.test_config['DB_URL'],
 
 @pytest.fixture
 def user_service():
-    return UserService(UserDao(database), config.test_config)
+    return UserService(UserDao(database), PlaylistDao(database), config.test_config)
 
 @pytest.fixture
 def community_service():
@@ -284,16 +284,20 @@ def test_follower_ranking(user_service):
 
 def test_info_community(community_service):
     assert community_service.info_community() == [{
-        'id': 1,
+        'community_id': 1,
+        'user_id': 1,
         'user_name': 'kim',
         'title': 'test title',
         'content': 'test content',
-        'comments': [{'user_name': 'kim', 'comment': 'test comment'}]
+        'comments': [{
+            'user_id': 1,
+            'user_name': 'kim',
+            'comment': 'test comment'}]
     }]
 
 def test_info_community_by_id(community_service):
     info = community_service.info_community_by_id(1)
-    assert info['id'] == 1
+    assert info['community_id'] == 1
 
 def test_community(community_service):
     title = "test2"
@@ -322,17 +326,21 @@ def test_community_comment(community_service):
 
 def test_playlist_community(playlist_service):
     assert playlist_service.playlist_community() == [{
-        'id': 1,
+        'playlist_id': 1,
+        'user_id': 1,
         'user_name': 'kim',
         'like': 0,
         'title': 'test playlist title',
         'description': 'test description',
         'song': [{'title': 'test song title', 'singer': 'test singer'}],
-        'comments': [{'user_name': 'kim', 'comment': 'test playlist comment'}]
+        'comments': [{
+            'user_id': 1,
+            'user_name': 'kim',
+            'comment': 'test playlist comment'}]
     }]
 
 def test_playlist_community_by_id(playlist_service):
-    assert playlist_service.playlist_community_by_id(1)['id'] == 1
+    assert playlist_service.playlist_community_by_id(1)['playlist_id'] == 1
 
 def test_playlist(playlist_service):
     title = "test2"
@@ -379,11 +387,13 @@ def test_ranking(playlist_service):
     playlist_service.like(1, 1)
     assert playlist_service.ranking() == [
         {
+            'user_id': 1,
             'name': 'kim',
             'title': 'test playlist title',
             'like': 1
         },
         {
+            'user_id': 2,
             'name': 'lee',
             'title': title,
             'like': 0

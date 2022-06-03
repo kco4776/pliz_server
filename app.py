@@ -26,7 +26,7 @@ def create_app(test_config=None):
     playlist_dao = PlaylistDao(database)
 
     services = Services
-    services.user_service = UserService(user_dao, app.config)
+    services.user_service = UserService(user_dao, playlist_dao, app.config)
     services.community_service = CommunityService(community_dao)
     services.playlist_service = PlaylistService(playlist_dao)
 
