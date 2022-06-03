@@ -74,26 +74,14 @@ def create_endpoints(app, services, config):
     @app.route("/user-info/<int:user_id>", methods=['GET'])
     def user_info(user_id):
         info = user_service.user_info(user_id)
-        return jsonify({
-            'user_id': info['id'],
-            'name': info['name'],
-            'email': info['email'],
-            'follower': info['follower'],
-            'follow': info['follow']
-        }) if info else Response(status=404)
+        return jsonify(info) if info else Response(status=404)
 
     @app.route("/my-info", methods=['GET'])
     @login_required
     def my_info():
         user_id = g.user_id
         info = user_service.user_info(user_id)
-        return jsonify({
-            'user_id': info['id'],
-            'name': info['name'],
-            'email': info['email'],
-            'follower': info['follower'],
-            'follow': info['follow']
-        }) if info else Response(status=404)
+        return jsonify(info) if info else Response(status=404)
 
     @app.route("/unfollow", methods=['POST'])
     @login_required
@@ -149,7 +137,7 @@ def create_endpoints(app, services, config):
         community_service.comment(user_id, community_id, _comment)
         return Response(status=200)
 
-    @app.route("/search-song", methods=['GET'])
+    @app.route("/search-song", methods=['POST'])
     def search_song():
         payload = request.json
         if 'title' not in payload.keys():

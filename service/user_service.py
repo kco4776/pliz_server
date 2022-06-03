@@ -5,8 +5,9 @@ from datetime import datetime, timedelta
 
 
 class UserService:
-    def __init__(self, user_dao, config):
+    def __init__(self, user_dao, playlist_dao, config):
         self.user_dao = user_dao
+        self.playlist_dao = playlist_dao
         self.config = config
 
     def create_new_user(self, new_user):
@@ -37,7 +38,9 @@ class UserService:
         return token
 
     def user_info(self, user_id):
-        return self.user_dao.get_user(user_id)
+        info = self.user_dao.get_user(user_id)
+        info['like_playlist'] = self.playlist_dao.get_like_playlist(user_id)
+        return info
 
     def follow(self, user_id, follow_id):
         return self.user_dao.insert_follow(user_id, follow_id)

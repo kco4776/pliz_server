@@ -132,6 +132,18 @@ def setup_function():
         'playlist_id': 1,
         'comment': "test playlist comment"
     })
+    database.execute(text("""
+        INSERT INTO users_like_list (
+            user_id,
+            like_playlist_id
+        ) VALUES (
+            :user_id,
+            :playlist_id
+        )
+    """), {
+        'user_id': 2,
+        'playlist_id': 1
+    })
 
 
 def teardown_function():
@@ -309,6 +321,7 @@ def test_insert_comment(community_dao):
 
 def test_get_comments(community_dao):
     assert community_dao.get_comments(1) == [{
+        'user_id': 1,
         'user_name': 'kim',
         'comment': 'test comment'
     }]
@@ -316,18 +329,20 @@ def test_get_comments(community_dao):
 
 def test_get_community(community_dao):
     assert community_dao.get_community() == [{
-        'id': 1,
+        'community_id': 1,
+        'user_id': 1,
         'user_name': 'kim',
         'title': 'test title',
         'content': 'test content',
         'comments': [{
+            'user_id': 1,
             'user_name': 'kim',
             'comment': 'test comment'
         }]
     }]
 
 def test_get_community_by_id(community_dao):
-    assert community_dao.get_community_by_id(1)['id'] == 1
+    assert community_dao.get_community_by_id(1)['community_id'] == 1
 
 
 def test_get_song(playlist_dao):
@@ -349,17 +364,21 @@ def test_insert_playlist(playlist_dao):
 
 def test_get_playlist(playlist_dao):
     assert playlist_dao.get_playlist() == [{
-        'id': 1,
+        'playlist_id': 1,
+        'user_id': 1,
         'user_name': 'kim',
         'like': 0,
         'title': "test playlist title",
         'description': 'test description',
         'song': [{'title': "test song title", 'singer': "test singer"}],
-        'comments': [{'user_name': 'kim', 'comment': "test playlist comment"}]
+        'comments': [{
+            'user_id': 1,
+            'user_name': 'kim',
+            'comment': "test playlist comment"}]
     }]
 
 def test_get_playlist_by_id(playlist_dao):
-    assert playlist_dao.get_playlist_by_id(1)['id'] == 1
+    assert playlist_dao.get_playlist_by_id(1)['playlist_id'] == 1
 
 def test_insert_like(playlist_dao):
     playlist_dao.insert_like(1, 1)
@@ -377,11 +396,13 @@ def test_playlist_ranking(playlist_dao):
     playlist_dao.insert_like(1, 1)
     assert playlist_dao.get_playlist_ranking() == [
         {
+            'user_id': 1,
             'name': 'kim',
             'title': 'test playlist title',
             'like': 1
         },
         {
+            'user_id': 2,
             'name': 'lee',
             'title': 'test2',
             'like': 0
@@ -393,12 +414,20 @@ def test_playlist_comment(playlist_dao):
     playlist = playlist_dao.get_playlist()
     assert playlist[0]['comments'] == [
         {
+            'user_id': 1,
             'user_name': 'kim',
             'comment': 'test playlist comment'
         },
         {
+            'user_id': 2,
             'user_name': 'lee',
             'comment': "test2"
         }
     ]
+
+def test_get_like_playlist(playlist_dao):
+    assert playlist_dao.get_like_playlist(2) == [{
+        'playlist_id': 1,
+        'title': 'test playlist title'
+    }]
 
