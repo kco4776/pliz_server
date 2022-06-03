@@ -82,17 +82,18 @@ def create_endpoints(app, services, config):
             'follow': info['follow']
         }) if info else Response(status=404)
 
-    @app.route("/follow", methods=['POST'])
+    @app.route("/my-info", methods=['GET'])
     @login_required
-    def follow():
-        payload = request.json
-        if 'follow' not in payload.keys():
-            return Response(status=400)
+    def my_info():
         user_id = g.user_id
-        follow_id = payload['follow']
-
-        user_service.follow(user_id, follow_id)
-        return Response(status=200)
+        info = user_service.user_info(user_id)
+        return jsonify({
+            'user_id': info['id'],
+            'name': info['name'],
+            'email': info['email'],
+            'follower': info['follower'],
+            'follow': info['follow']
+        }) if info else Response(status=404)
 
     @app.route("/unfollow", methods=['POST'])
     @login_required
