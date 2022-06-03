@@ -56,7 +56,7 @@ class CommunityDao:
             SELECT cc.id, users.name, cc.title, cc.content
             FROM community as cc
             JOIN users ON cc.user_id = users.id
-            ORDER BY cc.created_at DESC LIMIT 30
+            ORDER BY cc.created_at DESC
         """)).fetchall()
         return [{
             'id': p['id'],
