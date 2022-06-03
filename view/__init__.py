@@ -156,6 +156,19 @@ def create_endpoints(app, services, config):
             } for m in matches]
         })
 
+    @app.route("/lastfm-ranking", methods=['GET'])
+    def lastfm_ranking():
+        last_fm = requests.get(
+            f"https://ws.audioscrobbler.com/2.0/?method=chart.gettoptracks&api_key={config['LAST_FM_API_KEY']}&format=json")
+        last_fm = last_fm.json()
+        ranking = last_fm['tracks']['track']
+        return jsonify({
+            'ranking': [{
+                'title': r['name'],
+                'singer': r['artist']['name']
+            } for r in ranking]
+        })
+
     @app.route("/playlist-community", methods=['GET'])
     def playlist_community():
         return jsonify({
