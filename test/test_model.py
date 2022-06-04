@@ -286,6 +286,21 @@ def test_get_follower_ranking(user_dao):
         }
     ]
 
+def test_get_follow_list(user_dao):
+    user_dao.insert_follow(1, 2)
+    follow_list = user_dao.get_follow_list(1)
+    assert follow_list == [{
+        'user_id': 2,
+        'name': 'lee'
+    }]
+
+def test_get_follower_list(user_dao):
+    user_dao.insert_follow(2, 1)
+    follower_list = user_dao.get_follower_list(1)
+    assert follower_list == [{
+        'user_id': 2,
+        'name': 'lee'
+    }]
 
 def test_insert_community(community_dao):
     title = "test2"

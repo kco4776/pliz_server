@@ -164,26 +164,43 @@ def test_authorized(api):
     )
     assert resp.status_code == 401
 
-# def test_follow(api):
-#     resp = api.post(
-#         '/login',
-#         data = json.dumps({
-#             'email': 'kim@gmail.com',
-#             'password': 'test password'
-#         }),
-#         content_type = 'application/json'
-#     )
-#     resp_json = json.loads(resp.data.decode('utf-8'))
-#     access_token = resp_json['access_token']
-#
-#     resp = api.post(
-#         '/follow',
-#         data = json.dumps({
-#             'follow': 2
-#         }),
-#         Authorization=access_token,
-#         content_type='application/json'
-#     )
+def test_follow(api):
+    resp = api.post(
+        '/login',
+        data = json.dumps({
+            'email': 'kim@gmail.com',
+            'password': 'test password'
+        }),
+        content_type = 'application/json'
+    )
+    resp_json = json.loads(resp.data.decode('utf-8'))
+    access_token = resp_json['access_token']
+
+    resp = api.post(
+        '/follow',
+        data = json.dumps({
+            'follow': 2
+        }),
+        headers={'Authorization': access_token},
+        content_type='application/json'
+    )
+    assert resp.status_code == 200
+    f_list = api.get(
+        '/follow-list/1'
+    )
+    f_list = json.loads(f_list.data.decode('utf-8'))
+    assert f_list == {'follow_list': [{
+        'user_id': 2,
+        'name': 'lee'
+    }]}
+    f_list = api.get(
+        'follower-list/2'
+    )
+    f_list = json.loads(f_list.data.decode('utf-8'))
+    assert f_list == {'follower_list': [{
+        'user_id': 1,
+        'name': 'kim'
+    }]}
 
 def test_my_info(api):
     resp = api.post(
@@ -202,4 +219,4 @@ def test_my_info(api):
         headers={'Authorization': access_token}
     )
     resp_json = json.loads(resp.data.decode('utf-8'))
-    assert resp_json['email'] == 'kim@gmail.com'
+    assert resp_json['user_id'] == 1

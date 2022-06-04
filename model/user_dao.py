@@ -109,3 +109,27 @@ class UserDao:
             'email': r['email'],
             'follower': r['follower']
         } for r in ranking]
+
+    def get_follow_list(self, user_id):
+        follow = self.db.execute(text("""
+            SELECT users.id, users.name
+            FROM users_follow_list as fl
+            JOIN users ON fl.follow_user_id = users.id
+            WHERE fl.user_id = :id
+        """), {'id': user_id}).fetchall()
+        return [{
+            'user_id': f['id'],
+            'name': f['name']
+        } for f in follow]
+
+    def get_follower_list(self, user_id):
+        follower = self.db.execute(text("""
+            SELECT users.id, users.name
+            FROM users_follow_list as fl
+            JOIN users on fl.user_id = users.id
+            WHERE fl.follow_user_id = :id
+        """), {'id': user_id}).fetchall()
+        return [{
+            'user_id': f['id'],
+            'name': f['name']
+        } for f in follower]
