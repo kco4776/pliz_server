@@ -80,8 +80,20 @@ def create_endpoints(app, services, config):
     @login_required
     def my_info():
         user_id = g.user_id
-        info = user_service.user_info(user_id)
-        return jsonify(info) if info else Response(status=404)
+        return jsonify({
+            'user_id': user_id
+        })
+
+    @app.route("/follow", methods=['POST'])
+    @login_required
+    def follow():
+        payload = request.json
+        if 'follow' not in payload:
+            return Response(status=400)
+        user_id = g.user_id
+        follow_id = payload['follow']
+        user_service.follow(user_id, follow_id)
+        return Response(status=200)
 
     @app.route("/unfollow", methods=['POST'])
     @login_required
@@ -94,6 +106,20 @@ def create_endpoints(app, services, config):
 
         user_service.unfolow(user_id, unfollow_id)
         return Response(status=200)
+
+    @app.route("/follow-list/<int:user_id>", methods=['GET'])
+    def follow_list(user_id):
+        f_list = user_service.follow_list(user_id)
+        return jsonify({
+            'follow_list': f_list
+        })
+
+    @app.route("/follower-list/<int:user_id>", methods=['GET'])
+    def follower_list(user_id):
+        f_list = user_service.follower_list(user_id)
+        return jsonify({
+            'follower_list': f_list
+        })
 
     @app.route("/follower-ranking", methods=['GET'])
     def follower_ranking():

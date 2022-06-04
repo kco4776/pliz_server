@@ -50,4 +50,10 @@ class UserService:
 
     def follower_ranking(self):
         return self.user_dao.get_follower_ranking()
+
+    def follow_list(self, user_id):
+        return self.user_dao.get_follow_list(user_id)
+
+    def follower_list(self, user_id):
+        return self.user_dao.get_follower_list(user_id)
     
