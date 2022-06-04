@@ -11,14 +11,14 @@ class CommunityService:
         return self.community_dao.get_community_by_id(community_id)
 
     def community(self, user_id, title, content):
-        if len(title)>30:
+        if len(title)>30 or len(title)<=0:
             return None
-        if len(content)>500:
+        if len(content)>500 or len(content)<=0:
             return None
         new_community_id = self.community_dao.insert_community(user_id, title, content)
         return new_community_id
 
     def comment(self, user_id, community_id, comment):
-        if len(comment)>100:
+        if len(comment)>100 or len(comment)<=0:
             return None
         return self.community_dao.insert_comment(user_id, community_id, comment)
