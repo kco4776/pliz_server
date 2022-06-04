@@ -11,6 +11,8 @@ class UserService:
         self.config = config
 
     def create_new_user(self, new_user):
+        if len(new_user['password']) == 0:
+            return None
         new_user['password'] = bcrypt.hashpw(
             new_user['password'].encode('UTF-8'),
             bcrypt.gensalt()
