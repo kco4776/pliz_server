@@ -42,6 +42,7 @@ class UserService:
     def user_info(self, user_id):
         info = self.user_dao.get_user(user_id)
         info['like_playlist'] = self.playlist_dao.get_like_playlist(user_id)
+        info['my_playlist'] = self.playlist_dao.get_user_playlist(user_id)
         return info
 
     def follow(self, user_id, follow_id):

@@ -443,6 +443,14 @@ def test_playlist_comment(playlist_dao):
 def test_get_like_playlist(playlist_dao):
     assert playlist_dao.get_like_playlist(2) == [{
         'playlist_id': 1,
-        'title': 'test playlist title'
+        'title': 'test playlist title',
+        'like': 0
+    }]
+
+def test_get_user_playlist(playlist_dao):
+    assert playlist_dao.get_user_playlist(1) == [{
+        'playlist_id': 1,
+        'title': 'test playlist title',
+        'like': 0
     }]
 

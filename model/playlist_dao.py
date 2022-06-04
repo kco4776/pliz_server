@@ -169,12 +169,25 @@ class PlaylistDao:
 
     def get_like_playlist(self, user_id):
         like_playlist = self.db.execute(text("""
-            SELECT pl.id, pl.title
+            SELECT pl.id, pl.title, pl.like
             FROM users_like_list as ul
             JOIN playlist as pl ON ul.like_playlist_id = pl.id
             WHERE ul.user_id = :id
         """), {'id': user_id}).fetchall()
         return [{
             'playlist_id': p['id'],
-            'title': p['title']
+            'title': p['title'],
+            'like': p['like']
         } for p in like_playlist]
+
+    def get_user_playlist(self, user_id):
+        user_playlist = self.db.execute(text("""
+            SELECT pl.id, pl.title, pl.like
+            FROM playlist as pl
+            WHERE pl.user_id = :id
+        """), {'id': user_id}).fetchall()
+        return [{
+            'playlist_id': p['id'],
+            'title': p['title'],
+            'like': p['like']
+        } for p in user_playlist]
