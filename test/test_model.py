@@ -385,6 +385,7 @@ def test_get_playlist(playlist_dao):
         'like': 0,
         'title': "test playlist title",
         'description': 'test description',
+        'image': None,
         'song': [{'title': "test song title", 'singer': "test singer"}],
         'comments': [{
             'user_id': 1,
@@ -453,4 +454,20 @@ def test_get_user_playlist(playlist_dao):
         'title': 'test playlist title',
         'like': 0
     }]
+
+def test_insert_song(playlist_dao):
+    title = "test2"
+    singer = "test2"
+    playlist_dao.insert_song(title, singer, 1)
+    songs = playlist_dao.get_song(1)
+    assert songs == [
+        {
+            'title': 'test song title',
+            'singer': 'test singer'
+        },
+        {
+            'title': title,
+            'singer': singer
+        }
+    ]
 
