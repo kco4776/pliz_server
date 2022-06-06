@@ -332,6 +332,7 @@ def test_playlist_community(playlist_service):
         'like': 0,
         'title': 'test playlist title',
         'description': 'test description',
+        'image': None,
         'song': [{'title': 'test song title', 'singer': 'test singer'}],
         'comments': [{
             'user_id': 1,

@@ -53,7 +53,7 @@ class PlaylistDao:
 
     def get_playlist(self):
         playlist = self.db.execute(text("""
-                SELECT pl.id as playlist_id, users.id as user_id, users.name, pl.title, pl.description, pl.like FROM playlist as pl
+                SELECT pl.id as playlist_id, users.id as user_id, users.name, pl.title, pl.description, pl.like, pl.image FROM playlist as pl
                 LEFT JOIN users
                 ON pl.user_id = users.id
                 ORDER BY pl.created_at DESC limit 10
@@ -65,13 +65,14 @@ class PlaylistDao:
             'like': p['like'],
             'title': p['title'],
             'description': p['description'],
+            'image': p['image'],
             'song': self.get_song(p['playlist_id']),
             'comments': self.get_comments(p['playlist_id'])
         } for p in playlist]
 
     def get_playlist_by_id(self, playlist_id):
         playlist = self.db.execute(text("""
-            SELECT pl.id as playlist_id, users.id as user_id, users.name, pl.title, pl.description, pl.like
+            SELECT pl.id as playlist_id, users.id as user_id, users.name, pl.title, pl.description, pl.like, pl.image
             FROM playlist as pl
             JOIN users ON pl.user_id = users.id
             WHERE pl.id = :id
@@ -83,6 +84,7 @@ class PlaylistDao:
             'like': playlist['like'],
             'title': playlist['title'],
             'description': playlist['description'],
+            'image': playlist['image'],
             'song': self.get_song(playlist['playlist_id']),
             'comments': self.get_comments(playlist['playlist_id'])
         } if playlist else None
