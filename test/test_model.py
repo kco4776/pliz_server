@@ -452,7 +452,9 @@ def test_get_user_playlist(playlist_dao):
     assert playlist_dao.get_user_playlist(1) == [{
         'playlist_id': 1,
         'title': 'test playlist title',
-        'like': 0
+        'description': 'test description',
+        'like': 0,
+        'image': None
     }]
 
 def test_insert_song(playlist_dao):
